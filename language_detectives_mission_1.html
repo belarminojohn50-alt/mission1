@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Detectives: Mission 1 - Hear the Clues</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            DEFAULT: '#172A3A',
+                            dark: '#0f1c27',
+                            light: '#223c52'
+                        },
+                        ivory: {
+                            DEFAULT: '#F7F4ED',
+                            dark: '#e8e2d5'
+                        },
+                        gold: {
+                            DEFAULT: '#C6A15B',
+                            light: '#d8ba7f',
+                            dark: '#a8833e'
+                        },
+                        slate: {
+                            DEFAULT: '#52616B',
+                            light: '#728491'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Styles for Interactive Polish & Accessibility */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #172A3A;
+            color: #F7F4ED;
+            user-select: none;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #C6A15B;
+            border-radius: 4px;
+        }
+
+        .highlight-selectable {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-block;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        .highlight-selectable:hover {
+            background-color: rgba(198, 161, 91, 0.3);
+        }
+        .highlight-selected {
+            background-color: #C6A15B !important;
+            color: #172A3A !important;
+            font-weight: bold;
+        }
+
+        .badge-locked {
+            filter: grayscale(100%) opacity(40%);
+        }
+
+        /* Focus outline for accessibility */
+        button:focus-visible, [tabindex="0"]:focus-visible {
+            outline: 3px solid #C6A15B;
+            outline-offset: 2px;
+        }
+
+        .pulse-gold {
+            animation: pulse-gold-anim 2s infinite;
+        }
+        @keyframes pulse-gold-anim {
+            0% { box-shadow: 0 0 0 0 rgba(198, 161, 91, 0.6); }
+            70% { box-shadow: 0 0 0 10px rgba(198, 161, 91, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(198, 161, 91, 0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-ivory antialiased selection:bg-gold selection:text-navy">
+
+    <!-- Application Header -->
+    <header class="bg-navy-dark border-b border-gold/20 px-4 py-3 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-gold text-navy w-9 h-9 rounded-lg flex items-center justify-center font-bold text-lg shadow-md">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-sm md:text-base leading-tight text-ivory">Language Detectives</h1>
+                    <p class="text-xs text-gold">Mission 1: Hear the Clues</p>
+                </div>
+            </div>
+
+            <!-- Score & Audio Control Header Widget -->
+            <div class="flex items-center gap-4">
+                <button id="tts-btn" onclick="toggleAudio()" class="flex items-center gap-2 text-xs bg-navy-light hover:bg-slate px-3 py-1.5 rounded-full border border-gold/30 transition text-ivory" aria-label="Toggle Optional Read Aloud Audio">
+                    <i id="tts-icon" class="fa-solid fa-volume-xmark text-gold"></i>
+                    <span id="tts-text" class="hidden sm:inline">Audio Off</span>
+                </button>
+
+                <div id="score-display" class="hidden flex items-center gap-2 bg-navy-light px-3 py-1.5 rounded-full border border-gold/30">
+                    <i class="fa-solid fa-star text-gold text-xs"></i>
+                    <span class="text-xs font-semibold text-ivory">Score: <span id="current-score" class="text-gold font-bold">0</span>/150</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Canvas -->
+    <main class="flex-grow max-w-4xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center my-auto">
+        
+        <!-- Global Progress Bar Container (Hidden on Screen 1 & 13) -->
+        <div id="progress-container" class="hidden mb-6">
+            <div class="flex justify-between items-center text-xs text-ivory/70 mb-2">
+                <span id="screen-label" class="font-medium">Screen Progress</span>
+                <span id="screen-count" class="text-gold font-semibold">1 / 13</span>
+            </div>
+            <div class="w-full bg-navy-light h-2 rounded-full overflow-hidden border border-gold/20">
+                <div id="progress-bar" class="bg-gradient-to-r from-gold/80 to-gold h-full w-1/13 transition-all duration-300"></div>
+            </div>
+        </div>
+
+        <!-- Dynamic Screen Canvas Container -->
+        <div id="app-canvas" class="bg-navy-dark/70 backdrop-blur-sm border border-gold/20 rounded-2xl p-6 md:p-8 shadow-2xl relative min-h-[460px] flex flex-col justify-between">
+            <!-- Dynamic Content Injected Here by JS -->
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-navy-dark border-t border-gold/10 py-3 px-4 text-center text-xs text-ivory/50">
+        <div class="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+            <span>Grade 9 English</span>
+            <span class="text-gold/80">Mission 1: Sound & Meaning Quest</span>
+        </div>
+    </footer>
+
+    <script>
+        /* State Management System */
+        const state = {
+            currentScreen: 1,
+            score: 0,
+            firstAttemptScore: 0,
+            audioEnabled: false,
+            speechSynth: window.speechSynthesis || null,
+            
+            // Progressive Reveal states for Concept Screens (Screens 4-7)
+            conceptRevealStage: {
+                4: 1, // 1: Def & Example, 2: How to Spot & Tip, 3: Checkpoint Question
+                5: 1,
+                6: 1,
+                7: 1
+            },
+
+            // Screen Checkpoint States
+            checkpoints: {
+                4: { completed: false, attempt: 0, scoreEarned: 0, choice: null },
+                5: { completed: false, attempt: 0, scoreEarned: 0, choice: null },
+                6: { completed: false, attempt: 0, scoreEarned: 0, choice: null },
+                7: { completed: false, attempt: 0, scoreEarned: 0, choice: null }
+            },
+
+            // Screen 9 Mixed Challenge State
+            challenge: {
+                currentIndex: 0,
+                items: [
+                    { id: 1, completed: false, attempt: 0, scoreEarned: 0, userChoice: null },
+                    { id: 2, completed: false, attempt: 0, scoreEarned: 0, userChoice: null },
+                    { id: 3, completed: false, attempt: 0, scoreEarned: 0, userChoice: null },
+                    { id: 4, completed: false, attempt: 0, scoreEarned: 0, userChoice: null },
+                    { id: 5, completed: false, attempt: 0, scoreEarned: 0, userChoice: null },
+                    { id: 6, completed: false, attempt: 0, scoreEarned: 0, userChoice: null }
+                ]
+            },
+
+            // Screen 11 Final Case Tasks State
+            finalCase: {
+                currentIndex: 0,
+                tasks: [
+                    { id: 1, type: 'highlight_pair', completed: false, attempt: 0, scoreEarned: 0, selected: [] },
+                    { id: 2, type: 'drag_tap', completed: false, attempt: 0, scoreEarned: 0, value: null },
+                    { id: 3, type: 'highlight_line', completed: false, attempt: 0, scoreEarned: 0, selectedIndex: null },
+                    { id: 4, type: 'highlight_phrase', completed: false, attempt: 0, scoreEarned: 0, selectedIndex: null },
+                    { id: 5, type: 'select_effect', completed: false, attempt: 0, scoreEarned: 0, choice: null }
+                ]
+            },
+
+            // Earned Badges Tracking
+            badges: {
+                rhyme: false,
+                repetition: false,
+                alliteration: false,
+                anaphora: false,
+                sleuth: false,    // Completion Badge
+                master: false     // Score >= 120
+            }
+        };
+
+        function toggleAudio() {
+            state.audioEnabled = !state.audioEnabled;
+            const icon = document.getElementById('tts-icon');
+            const text = document.getElementById('tts-text');
+
+            if (state.audioEnabled) {
+                icon.className = "fa-solid fa-volume-high text-gold";
+                text.innerText = "Audio On";
+                speakText("Audio read-aloud enabled.");
+            } else {
+                icon.className = "fa-solid fa-volume-xmark text-gold";
+                text.innerText = "Audio Off";
+                if (state.speechSynth) state.speechSynth.cancel();
+            }
+        }
+
+        function speakText(text) {
+            if (!state.audioEnabled || !state.speechSynth) return;
+            state.speechSynth.cancel(); // Stop ongoing speech
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.9;
+            utterance.pitch = 1.0;
+            state.speechSynth.speak(utterance);
+        }
+
+        function updateScore(points, isFirstAttempt) {
+            state.score += points;
+            if (isFirstAttempt) {
+                state.firstAttemptScore += points;
+            }
+            document.getElementById('current-score').innerText = state.score;
+        }
+
+        function updateProgress() {
+            const container = document.getElementById('progress-container');
+            const scoreDisplay = document.getElementById('score-display');
+            const bar = document.getElementById('progress-bar');
+            const label = document.getElementById('screen-label');
+            const count = document.getElementById('screen-count');
+
+            if (state.currentScreen === 1 || state.currentScreen === 13) {
+                container.classList.add('hidden');
+            } else {
+                container.classList.remove('hidden');
+                scoreDisplay.classList.remove('hidden');
+                bar.style.width = `${(state.currentScreen / 13) * 100}%`;
+                count.innerText = `${state.currentScreen} / 13`;
+                
+                const titles = [
+                    "", "Welcome", "Detective Briefing", "Warm-up Quest",
+                    "Clue File 01: Rhyme", "Clue File 02: Repetition",
+                    "Clue File 03: Alliteration", "Clue File 04: Anaphora",
+                    "Comparison Board", "Six-Question Challenge",
+                    "Final Case Poem", "Annotate Final Case",
+                    "Case Debrief", "Mission Complete"
+                ];
+                label.innerText = titles[state.currentScreen] || "Mission Progress";
+            }
+        }
+
+        function navigateTo(screenNumber) {
+            if (screenNumber < 1 || screenNumber > 13) return;
+            state.currentScreen = screenNumber;
+            updateProgress();
+            renderScreen();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderScreen() {
+            const canvas = document.getElementById('app-canvas');
+            canvas.innerHTML = '';
+
+            switch(state.currentScreen) {
+                case 1: renderScreen1(canvas); break;
+                case 2: renderScreen2(canvas); break;
+                case 3: renderScreen3(canvas); break;
+                case 4: renderConceptScreen(canvas, 4); break;
+                case 5: renderConceptScreen(canvas, 5); break;
+                case 6: renderConceptScreen(canvas, 6); break;
+                case 7: renderConceptScreen(canvas, 7); break;
+                case 8: renderScreen8(canvas); break;
+                case 9: renderScreen9(canvas); break;
+                case 10: renderScreen10(canvas); break;
+                case 11: renderScreen11(canvas); break;
+                case 12: renderScreen12(canvas); break;
+                case 13: renderScreen13(canvas); break;
+            }
+        }
+
+        function renderScreen1(canvas) {
+            speakText("Welcome to Language Detectives. The Missing Sound Clues. Every sound tells a story. Can you find the pattern?");
+            
+            canvas.innerHTML = `
+                <div class="flex flex-col items-center justify-center text-center my-auto py-6 space-y-6">
+                    <div class="relative">
+                        <div class="w-24 h-24 md:w-32 md:h-32 bg-gold/10 border-2 border-gold rounded-full flex items-center justify-center text-gold text-4xl md:text-5xl shadow-lg pulse-gold">
+                            <i class="fa-solid fa-folder-open"></i>
+                        </div>
+                        <div class="absolute -bottom-2 -right-2 bg-gold text-navy w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold">
+                            <i class="fa-solid fa-search"></i>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 max-w-xl">
+                        <span class="inline-block bg-gold/20 text-gold font-bold text-xs uppercase tracking-wider px-3 py-1 rounded-full border border-gold/30">
+                            Grade 9 English Mission
+                        </span>
+                        <h2 class="text-2xl md:text-4xl font-extrabold text-ivory tracking-tight">THE MISSING SOUND CLUES</h2>
+                        <p class="text-base md:text-lg text-ivory/90 font-medium">Every sound tells a story. Can you find the pattern?</p>
+                        <p class="text-sm text-ivory/70 leading-relaxed">
+                            Four sound devices are hiding in the literary lines. Identify the clues, collect evidence, and solve the case.
+                        </p>
+                    </div>
+
+                    <button onclick="navigateTo(2)" class="mt-4 bg-gold hover:bg-gold-light text-navy font-extrabold text-base px-8 py-3.5 rounded-xl shadow-lg hover:shadow-gold/20 transition transform hover:-translate-y-0.5 flex items-center gap-3">
+                        <span>START INVESTIGATION</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderScreen2(canvas) {
+            speakText("Your Detective Briefing. Your mission is to investigate four sound devices.");
+
+            canvas.innerHTML = `
+                <div class="space-y-6">
+                    <div class="border-b border-gold/20 pb-4">
+                        <span class="text-gold text-xs font-bold uppercase tracking-widest">Screen 02</span>
+                        <h2 class="text-xl md:text-2xl font-bold text-ivory">Your Detective Briefing</h2>
+                        <p class="text-sm text-ivory/80 mt-1">Your mission is to investigate four sound devices across literary clues.</p>
+                    </div>
+
+                    <!-- 4 Concept Cards Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-navy-light/80 p-4 rounded-xl border border-gold/20 hover:border-gold/50 transition">
+                            <div class="flex items-center gap-2 mb-2 text-gold font-bold">
+                                <i class="fa-solid fa-music"></i>
+                                <span>Rhyme</span>
+                            </div>
+                            <p class="text-xs text-ivory/80">Matching or similar ending sounds in nearby words.</p>
+                        </div>
+
+                        <div class="bg-navy-light/80 p-4 rounded-xl border border-gold/20 hover:border-gold/50 transition">
+                            <div class="flex items-center gap-2 mb-2 text-gold font-bold">
+                                <i class="fa-solid fa-rotate-right"></i>
+                                <span>Repetition</span>
+                            </div>
+                            <p class="text-xs text-ivory/80">A word, phrase, line, or pattern used again for emphasis.</p>
+                        </div>
+
+                        <div class="bg-navy-light/80 p-4 rounded-xl border border-gold/20 hover:border-gold/50 transition">
+                            <div class="flex items-center gap-2 mb-2 text-gold font-bold">
+                                <i class="fa-solid fa-font"></i>
+                                <span>Alliteration</span>
+                            </div>
+                            <p class="text-xs text-ivory/80">Repeated initial consonant sounds in nearby words.</p>
+                        </div>
+
+                        <div class="bg-navy-light/80 p-4 rounded-xl border border-gold/20 hover:border-gold/50 transition">
+                            <div class="flex items-center gap-2 mb-2 text-gold font-bold">
+                                <i class="fa-solid fa-[#]"></i>
+                                <span>Anaphora</span>
+                            </div>
+                            <p class="text-xs text-ivory/80">Repeated words or phrases at the beginnings of successive lines.</p>
+                        </div>
+                    </div>
+
+                    <!-- Explanation & Rules Box -->
+                    <div class="bg-navy p-4 rounded-xl border border-slate/30 text-xs text-ivory/80 space-y-2">
+                        <p class="text-ivory font-semibold"><i class="fa-solid fa-circle-info text-gold mr-1"></i> Why Sound Devices Matter:</p>
+                        <p>Sound patterns create rhythm, emphasize key ideas, and influence how readers experience a poem's emotion and meaning.</p>
+                        <p class="text-gold/90 font-medium pt-1"><strong>How to play:</strong> Study each clue file, answer the checkpoints, collect up to 150 points, and solve the final case poem!</p>
+                    </div>
+
+                    <!-- Footer Controls -->
+                    <div class="flex justify-between items-center pt-2">
+                        <button onclick="navigateTo(1)" class="text-xs text-ivory/70 hover:text-ivory px-3 py-2">
+                            <i class="fa-solid fa-arrow-left mr-1"></i> Back
+                        </button>
+                        <button onclick="navigateTo(3)" class="bg-gold hover:bg-gold-light text-navy font-bold text-sm px-6 py-2.5 rounded-lg transition flex items-center gap-2">
+                            <span>I'M READY</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderScreen3(canvas) {
+            speakText("Warm-up: Listen for the Pattern. Read these words aloud: rain, train, plain. What do you notice?");
+
+            canvas.innerHTML = `
+                <div class="space-y-6">
+                    <div class="border-b border-gold/20 pb-3 flex justify-between items-center">
+                        <div>
+                            <span class="text-gold text-xs font-bold uppercase tracking-widest">Screen 03 • Warm-up</span>
+                            <h2 class="text-xl font-bold text-ivory">Listen for the Pattern</h2>
+                        </div>
+                        <span class="bg-slate/40 text-xs px-2.5 py-1 rounded-full text-ivory/70 border border-slate/30">Unscored Activity</span>
+                    </div>
+
+                    <!-- Prompt Box -->
+                    <div class="bg-navy p-5 rounded-xl border border-gold/30 text-center space-y-2">
+                        <p class="text-xs text-gold font-semibold uppercase">Read these words aloud:</p>
+                        <p class="text-2xl font-bold text-ivory tracking-wide">"rain — train — plain"</p>
+                        <p class="text-sm text-ivory/80 pt-1">What do you notice about these words?</p>
+                    </div>
+
+                    <!-- Choices Grid -->
+                    <div class="space-y-2.5" id="warmup-choices">
+                        <button onclick="checkWarmup('A')" class="w-full text-left p-3.5 bg-navy-light/80 hover:bg-navy-light rounded-xl border border-gold/10 hover:border-gold/40 text-sm transition flex items-center gap-3">
+                            <span class="w-7 h-7 rounded-lg bg-navy flex items-center justify-center font-bold text-gold text-xs border border-gold/30">A</span>
+                            <span>They repeat the exact same word.</span>
+                        </button>
+                        <button onclick="checkWarmup('B')" class="w-full text-left p-3.5 bg-navy-light/80 hover:bg-navy-light rounded-xl border border-gold/10 hover:border-gold/40 text-sm transition flex items-center gap-3">
+                            <span class="w-7 h-7 rounded-lg bg-navy flex items-center justify-center font-bold text-gold text-xs border border-gold/30">B</span>
+                            <span>They have similar ending sounds.</span>
+                        </button>
+                        <button onclick="checkWarmup('C')" class="w-full text-left p-3.5 bg-navy-light/80 hover:bg-navy-light rounded-xl border border-gold/10 hover:border-gold/40 text-sm transition flex items-center gap-3">
+                            <span class="w-7 h-7 rounded-lg bg-navy flex items-center justify-center font-bold text-gold text-xs border border-gold/30">C</span>
+                            <span>They begin with the same consonant sound.</span>
+                        </button>
+                        <button onclick="checkWarmup('D')" class="w-full text-left p-3.5 bg-navy-light/80 hover:bg-navy-light rounded-xl border border-gold/10 hover:border-gold/40 text-sm transition flex items-center gap-3">
+                            <span class="w-7 h-7 rounded-lg bg-navy flex items-center justify-center font-bold text-gold text-xs border border-gold/30">D</span>
+                            <span>They repeat the same phrase at the beginning of successive lines.</span>
+                        </button>
+                    </div>
+
+                    <!-- Feedback Container -->
+                    <div id="warmup-feedback" class="hidden p-4 rounded-xl text-sm border"></div>
+
+                    <!-- Footer Controls -->
+                    <div class="flex justify-between items-center pt-2">
+                        <button onclick="navigateTo(2)" class="text-xs text-ivory/70 hover:text-ivory px-3 py-2">
+                            <i class="fa-solid fa-arrow-left mr-1"></i> Back
+                        </button>
+                        <button id="warmup-next-btn" onclick="navigateTo(4)" class="hidden bg-gold hover:bg-gold-light text-navy font-bold text-sm px-6 py-2.5 rounded-lg transition flex items-center gap-2">
+                            <span>CONTINUE TO CLUE 01</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function checkWarmup(choice) {
+            const feedback = document.getElementById('warmup-feedback');
+            const nextBtn = document.getElementById('warmup-next-btn');
+            feedback.classList.remove('hidden');
+
+            if (choice === 'B') {
+                feedback.className = "p-4 rounded-xl text-sm border border-green-500/30 bg-green-900/20 text-green-200";
+                feedback.innerHTML = `
+                    <div class="font-bold flex items-center gap-2 mb-1">
+                        <i class="fa-solid fa-circle-check text-green-400"></i> Correct!
+                    </div>
+                    <p>Rain, train, and plain share similar ending sounds (/ain/). That sound pattern is a clue for <strong>rhyme</strong>.</p>
+                `;
+                speakText("Correct. Rain, train, and plain share similar ending sounds. That is a clue for rhyme.");
+                nextBtn.classList.remove('hidden');
+            } else {
+                feedback.className = "p-4 rounded-xl text-sm border border-amber-500/30 bg-amber-900/20 text-amber-200";
+                feedback.innerHTML = `
+                    <div class="font-bold flex items-center gap-2 mb-1">
+                        <i class="fa-solid fa-circle-exclamation text-amber-400"></i> Not quite.
+                    </div>
+                    <p>Read the three words aloud again: <em>rain, train, plain</em>. Listen to how their ending sounds compare.</p>
+                `;
+                speakText("Not quite. Read the three words aloud. Listen to how their ending sounds compare.");
+            }
+        }
+
+        const conceptData = {
+            4: {
+                title: "Clue File 01 — Rhyme",
+                badgeKey: "rhyme",
+                badgeTitle: "Rhyme Ranger",
+                def: "Rhyme occurs when words share matching or similar ending sounds. It can appear at the ends of lines (end rhyme) or within a line (internal rhyme). Focus mainly on end rhyme.",
+                evidenceText: "Stars shine in the night,\nEverything glows so bright.",
+                evidenceHighlights: "night / bright",
+                steps: [
+                    "1. Read the words aloud.",
+                    "2. Compare their ending sounds.",
+                    "3. Check whether the sounds match or are similar."
+                ],
+                tip: "The first sounds of <em>night</em> and <em>bright</em> differ, but their ending sounds match. Words do not have to be spelled identically to rhyme; focus on pronunciation.",
+                checkpoint: {
+                    question: "Which pair of words rhymes?",
+                    choices: [
+                        { id: 'A', text: "sun — moon" },
+                        { id: 'B', text: "light — bright" },
+                        { id: 'C', text: "rain — cloud" },
+                        { id: 'D', text: "tree — leaf" }
+                    ],
+                    correct: 'B',
+                    hint: "Compare the sounds at the ends of the two words.",
+                    correctFeedback: "Case clue found! Light and bright share the same ending sound (/ait/). Matching sound identifies the rhyme.",
+                    incorrectFeedback: "Look for words whose ending sounds match when spoken. Try reading each pair aloud."
+                }
+            },
+            5: {
+                title: "Clue File 02 — Repetition",
+                badgeKey: "repetition",
+                badgeTitle: "Repetition Tracker",
+                def: "Repetition is the deliberate reuse of a word, phrase, line, or pattern. Writers use it to emphasize an idea, strengthen rhythm, or make an expression memorable.",
+                evidenceText: "“Run, run, run until you reach the finish line.”",
+                evidenceHighlights: "The word 'run' appears three times.",
+                steps: [
+                    "1. Look for a word or phrase that appears more than once.",
+                    "2. Identify exactly what is repeated.",
+                    "3. Consider what the repeated expression emphasizes."
+                ],
+                tip: "Repetition is the broader category. Anaphora is a specific kind of repetition based on where the repeated words appear.",
+                checkpoint: {
+                    question: "In 'The bell rang, rang, rang across the hall,' which clue shows repetition?",
+                    choices: [
+                        { id: 'A', text: "The word rang appears three times." },
+                        { id: 'B', text: "The words have matching ending sounds." },
+                        { id: 'C', text: "Several nearby words begin with the same consonant sound." },
+                        { id: 'D', text: "Several clauses begin with the same phrase." }
+                    ],
+                    correct: 'A',
+                    hint: "Check whether one word appears more than once.",
+                    correctFeedback: "Correct! The word rang is deliberately repeated to draw attention to the bell's continued ringing.",
+                    incorrectFeedback: "Look for the feature that actually occurs in the sentence. Which word appears again and again?"
+                }
+            },
+            6: {
+                title: "Clue File 03 — Alliteration",
+                badgeKey: "alliteration",
+                badgeTitle: "Alliteration Alert",
+                def: "Alliteration is the repetition of the same or similar initial consonant sounds in nearby words. It can draw attention to words and contribute to sound or mood.",
+                evidenceText: "Bright birds bounce by the bay.",
+                evidenceHighlights: "Bright / birds / bounce / by / bay repeat the initial /b/ sound.",
+                steps: [
+                    "1. Look at the beginnings of nearby words.",
+                    "2. Say the words aloud.",
+                    "3. Identify the repeated consonant sound."
+                ],
+                tip: "Focus on the sound, not just the letter. Different letters can represent the same sound, and the same letter can make different sounds.",
+                checkpoint: {
+                    question: "Which sentence contains alliteration?",
+                    choices: [
+                        { id: 'A', text: "The rain fell during the night." },
+                        { id: 'B', text: "Mia made many maps." },
+                        { id: 'C', text: "I will listen, I will learn." },
+                        { id: 'D', text: "Go, go, go toward the gate." }
+                    ],
+                    correct: 'B',
+                    hint: "Which sentence contains several different words that begin with the same consonant sound?",
+                    correctFeedback: "Exactly! Mia, made, many, and maps repeat the initial /m/ sound. That pattern is alliteration.",
+                    incorrectFeedback: "Listen to the first consonant sounds in nearby words. Look for a repeated beginning sound."
+                }
+            },
+            7: {
+                title: "Clue File 04 — Anaphora",
+                badgeKey: "anaphora",
+                badgeTitle: "Anaphora Analyst",
+                def: "Anaphora is the repetition of a word or phrase at the beginning of successive clauses, sentences, or lines. It directs attention and builds momentum.",
+                evidenceText: "Every learner can ask. Every learner can explore. Every learner can grow.",
+                evidenceHighlights: "'Every learner' begins each successive sentence.",
+                steps: [
+                    "1. Find a phrase that appears at the beginning.",
+                    "2. Check whether it starts successive clauses, sentences, or lines.",
+                    "3. Explain which idea the repeated beginning emphasizes."
+                ],
+                tip: "Every anaphora example uses repetition, but not every repetition is anaphora. The position of the repeated phrase at the beginning is key.",
+                checkpoint: {
+                    question: "Which statement uses anaphora?",
+                    choices: [
+                        { id: 'A', text: "The clock ticked loudly." },
+                        { id: 'B', text: "The cat sat on the mat." },
+                        { id: 'C', text: "We will listen. We will learn. We will lead." },
+                        { id: 'D', text: "The tiny turtle travelled slowly." }
+                    ],
+                    correct: 'C',
+                    hint: "Find the phrase that starts each sentence.",
+                    correctFeedback: "Case solved! 'We will' appears at the beginning of successive sentences. That specific pattern is anaphora.",
+                    incorrectFeedback: "Look at the beginnings of successive sentences. Anaphora requires a repeated opening phrase."
+                }
+            }
+        };
+
+        function renderConceptScreen(canvas, screenNum) {
+            const data = conceptData[screenNum];
+            const stage = state.conceptRevealStage[screenNum];
+            const cpState = state.checkpoints[screenNum];
+
+            speakText(`${data.title}. ${data.def}`);
+
+            canvas.innerHTML = `
+                <div class="space-y-5">
+                    <!-- Header -->
+                    <div class="border-b border-gold/20 pb-3 flex justify-between items-center">
+                        <div>
+                            <span class="text-gold text-xs font-bold uppercase tracking-widest">Concept Clue ${screenNum - 3} of 4</span>
+                            <h2 class="text-xl font-bold text-ivory">${data.title}</h2>
+                        </div>
+                        <span id="badge-pill-${screenNum}" class="${state.badges[data.badgeKey] ? 'bg-gold/20 text-gold border-gold/40' : 'bg-slate/20 text-ivory/50 border-slate/30'} text-xs px-2.5 py-1 rounded-full border flex items-center gap-1.5 font-medium">
+                            <i class="fa-solid fa-award"></i>
+                            <span>${data.badgeTitle}</span>
+                        </span>
+                    </div>
+
+                    <!-- Stage 1: Definition & Worked Example -->
+                    <div class="bg-navy p-4 rounded-xl border border-gold/30 space-y-3">
+                        <div>
+                            <span class="text-xs text-gold font-semibold uppercase tracking-wide">Detective Definition</span>
+                            <p class="text-sm text-ivory/90 mt-0.5 leading-relaxed">${data.def}</p>
+                        </div>
+                        <div class="bg-navy-light/60 p-3 rounded-lg border border-gold/10">
+                            <span class="text-xs text-gold/80 font-medium uppercase">Study the Evidence:</span>
+                            <p class="text-base font-semibold text-ivory italic mt-0.5">${data.evidenceText.replace('\n', '<br>')}</p>
+                            <p class="text-xs text-gold mt-1"><i class="fa-solid fa-magnifying-glass mr-1"></i> <strong>Evidence:</strong> ${data.evidenceHighlights}</p>
+                        </div>
+                    </div>
+
+                    <!-- Stage 2: How to Spot It & Detective Tip (Progressive Reveal) -->
+                    ${stage < 2 ? `
+                        <div class="text-center pt-2">
+                            <button onclick="revealConceptStage(${screenNum}, 2)" class="bg-navy-light hover:bg-slate border border-gold/40 text-gold hover:text-ivory text-xs font-bold px-5 py-2.5 rounded-lg transition flex items-center justify-center gap-2 mx-auto">
+                                <i class="fa-solid fa-[#] text-sm"></i>
+                                <span>SHOW HOW TO SPOT IT</span>
+                            </button>
+                        </div>
+                    ` : `
+                        <div class="bg-navy-light/70 p-4 rounded-xl border border-gold/20 space-y-3 animate-fade-in">
+                            <div class="space-y-1.5">
+                                <span class="text-xs text-gold font-semibold uppercase tracking-wide">How to Spot It:</span>
+                                ${data.steps.map(s => `<p class="text-xs text-ivory/80">${s}</p>`).join('')}
+                            </div>
+                            <div class="p-2.5 bg-navy/80 rounded-lg border border-gold/20 text-xs text-ivory/80">
+                                <span class="text-gold font-bold"><i class="fa-solid fa-lightbulb mr-1"></i> Detective Tip:</span>
+                                <span>${data.tip}</span>
+                            </div>
+                        </div>
+                    `}
+
+                    <!-- Stage 3: Checkpoint Question (Progressive Reveal) -->
+                    ${stage === 2 ? `
+                        <div class="text-center pt-1">
+                            <button onclick="revealConceptStage(${screenNum}, 3)" class="bg-gold hover:bg-gold-light text-navy text-xs font-extrabold px-6 py-2.5 rounded-lg transition flex items-center justify-center gap-2 mx-auto shadow-md">
+                                <span>CONTINUE TO CHECKPOINT</span>
+                                <i class="fa-solid fa-arrow-down"></i>
+                            </button>
+                        </div>
+                    ` : stage === 3 ? `
+                        <div class="border-t border-gold/20 pt-4 space-y-3 animate-fade-in">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold text-gold uppercase tracking-wider">Concept Checkpoint (10 Points)</span>
+                                <button id="hint-btn-${screenNum}" onclick="showConceptHint(${screenNum})" class="text-xs text-gold/80 hover:text-gold flex items-center gap-1 bg-navy-light px-2.5 py-1 rounded border border-gold/20">
+                                    <i class="fa-solid fa-lightbulb"></i> Show Hint
+                                </button>
+                            </div>
+
+                            <p class="text-sm font-semibold text-ivory">${data.checkpoint.question}</p>
+
+                            <div id="hint-box-${screenNum}" class="hidden p-2.5 bg-amber-900/20 border border-amber-500/30 rounded-lg text-xs text-amber-200">
+                                <i class="fa-solid fa-circle-question mr-1"></i> <strong>Hint:</strong> ${data.checkpoint.hint}
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                ${data.checkpoint.choices.map(c => `
+                                    <button onclick="submitConceptAnswer(${screenNum}, '${c.id}')" 
+                                            id="cp-btn-${screenNum}-${c.id}"
+                                            ${cpState.completed ? 'disabled' : ''}
+                                            class="p-3 text-left bg-navy-light/90 hover:bg-navy-light border ${cpState.choice === c.id ? 'border-gold bg-navy-light' : 'border-gold/10'} rounded-lg text-xs font-medium transition flex items-center gap-2">
+                                        <span class="w-6 h-6 rounded bg-navy flex items-center justify-center font-bold text-gold text-xs border border-gold/20">${c.id}</span>
+                                        <span>${c.text}</span>
+                                    </button>
+                                `).join('')}
+                            </div>
+
+                            <div id="cp-feedback-${screenNum}" class="${cpState.completed ? '' : 'hidden'} p-3 rounded-lg text-xs border"></div>
+                        </div>
+                    ` : ''}
+
+                    <!-- Footer Controls -->
+                    <div class="flex justify-between items-center pt-2">
+                        <button onclick="navigateTo(${screenNum - 1})" class="text-xs text-ivory/70 hover:text-ivory px-3 py-2">
+                            <i class="fa-solid fa-arrow-left mr-1"></i> Back
+                        </button>
+                        <button id="next-concept-btn-${screenNum}" onclick="navigateTo(${screenNum + 1})" 
+                                class="${cpState.completed ? '' : 'opacity-50 pointer-events-none'} bg-gold hover:bg-gold-light text-navy font-bold text-xs px-5 py-2.5 rounded-lg transition flex items-center gap-2">
+                            <span>NEXT FILE</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            if (cpState.completed) {
+                renderConceptFeedbackUI(screenNum, cpState.choice === data.checkpoint.correct, cpState.choice);
+            }
+        }
+
+        function revealConceptStage(screenNum, stage) {
+            state.conceptRevealStage[screenNum] = stage;
+            renderScreen();
+        }
+
+        function showConceptHint(screenNum) {
+            const hintBox = document.getElementById(`hint-box-${screenNum}`);
+            if (hintBox) hintBox.classList.remove('hidden');
+        }
+
+        function submitConceptAnswer(screenNum, choice) {
+            const data = conceptData[screenNum];
+            const cpState = state.checkpoints[screenNum];
+            if (cpState.completed) return;
+
+            cpState.attempt++;
+            cpState.choice = choice;
+
+            const isCorrect = (choice === data.checkpoint.correct);
+
+            if (isCorrect) {
+                cpState.completed = true;
+                const points = (cpState.attempt === 1) ? 10 : 5;
+                cpState.scoreEarned = points;
+                updateScore(points, cpState.attempt === 1);
+                
+                // Award Badge
+                state.badges[data.badgeKey] = true;
+                
+                speakText("Correct! " + data.checkpoint.correctFeedback);
+                renderConceptFeedbackUI(screenNum, true, choice);
+            } else {
+                if (cpState.attempt === 1) {
+                    showConceptHint(screenNum);
+                    speakText("Not quite. " + data.checkpoint.incorrectFeedback);
+                    renderConceptFeedbackUI(screenNum, false, choice, true);
+                } else {
+                    cpState.completed = true;
+                    cpState.scoreEarned = 0;
+                    speakText("Incorrect attempt limit reached. " + data.checkpoint.incorrectFeedback);
+                    renderConceptFeedbackUI(screenNum, false, choice, false);
+                }
+            }
+        }
+
+        function renderConceptFeedbackUI(screenNum, isCorrect, choice, canRetry = false) {
+            const data = conceptData[screenNum];
+            const feedbackBox = document.getElementById(`cp-feedback-${screenNum}`);
+            const nextBtn = document.getElementById(`next-concept-btn-${screenNum}`);
+            if (!feedbackBox) return;
+
+            feedbackBox.classList.remove('hidden');
+
+            if (isCorrect) {
+                feedbackBox.className = "p-3 rounded-lg text-xs border border-green-500/40 bg-green-900/20 text-green-200 space-y-1";
+                feedbackBox.innerHTML = `
+                    <div class="font-bold flex items-center gap-1.5 text-green-400">
+                        <i class="fa-solid fa-circle-check"></i> Correct! (+${state.checkpoints[screenNum].scoreEarned} pts)
+                    </div>
+                    <p>${data.checkpoint.correctFeedback}</p>
+                `;
+                if (nextBtn) nextBtn.classList.remove('opacity-50', 'pointer-events-none');
+            } else if (canRetry) {
+                feedbackBox.className = "p-3 rounded-lg text-xs border border-amber-500/40 bg-amber-900/20 text-amber-200 space-y-1";
+                feedbackBox.innerHTML = `
+                    <div class="font-bold flex items-center gap-1.5 text-amber-400">
+                        <i class="fa-solid fa-circle-exclamation"></i> Try Again (1 Retry Remaining)
+                    </div>
+                    <p>${data.checkpoint.incorrectFeedback}</p>
+                `;
+            } else {
+                feedbackBox.className = "p-3 rounded-lg text-xs border border-red-500/40 bg-red-900/20 text-red-200 space-y-1";
+                feedbackBox.innerHTML = `
+                    <div class="font-bold flex items-center gap-1.5 text-red-400">
+                        <i class="fa-solid fa-circle-xmark"></i> Correct Answer: ${data.checkpoint.correct}
+                    </div>
+                    <p>${data.checkpoint.incorrectFeedback}</p>
+                `;
+                if (nextBtn) nextBtn.classList.remove('opacity-50', 'pointer-events-none');
+            }
+        }
+
+        function renderScreen8(canvas) {
+            speakText("The Detective's Comparison Board. Keep this board available as a reference during your challenges.");
+
+            canvas.innerHTML = `
+                <div class="space-y-5">
+                    <div class="border-b border-gold/20 pb-3 flex justify-between items-center">
+                        <div>
+                            <span class="text-gold text-xs font-bold uppercase tracking-widest">Screen 08 • Reference Board</span>
+                            <h2 class="text-xl font-bold text-ivory">The Detective's Comparison Board</h2>
+                        </div>
+                        <span class="bg-slate/40 text-xs px-2.5 py-1 rounded-full text-ivory/70 border border-slate/30">Reference Material</span>
+                    </div>
+
+                    <p class="text-xs text-ivory/80">Tap or click any sound device row to expand its detective question and evidence clue.</p>
+
+                    <!-- Accordion Board -->
+                    <div class="space-y-2.5" id="comparison-board-accordion">
+                        
+                        <!-- Row 1: Rhyme -->
+                        <div class="border border-gold/20 rounded-xl bg-navy-light/60 overflow-hidden">
+                            <button onclick="toggleAccordion('acc-rhyme')" class="w-full p-3.5 text-left font-bold text-sm text-gold flex justify-between items-center bg-navy-light/90 hover:bg-navy-light transition">
+                                <span class="flex items-center gap-2"><i class="fa-solid fa-music"></i> Rhyme</span>
+                                <i id="acc-rhyme-icon" class="fa-solid fa-chevron-down text-xs text-ivory/60"></i>
+                            </button>
+                            <div id="acc-rhyme" class="hidden p-4 text-xs text-ivory/90 border-t border-gold/10 space-y-1.5 bg-navy/50">
+                                <p><strong>Question to ask:</strong> Do the words have similar ending sounds?</p>
+                                <p><strong>Clue to look for:</strong> Matching or similar ending sounds.</p>
+                                <p class="text-gold"><em>Example:</em> night / bright</p>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Repetition -->
+                        <div class="border border-gold/20 rounded-xl bg-navy-light/60 overflow-hidden">
+                            <button onclick="toggleAccordion('acc-rep')" class="w-full p-3.5 text-left font-bold text-sm text-gold flex justify-between items-center bg-navy-light/90 hover:bg-navy-light transition">
+                                <span class="flex items-center gap-2"><i class="fa-solid fa-rotate-right"></i> Repetition</span>
+                                <i id="acc-rep-icon" class="fa-solid fa-chevron-down text-xs text-ivory/60"></i>
+                            </button>
+                            <div id="acc-rep" class="hidden p-4 text-xs text-ivory/90 border-t border-gold/10 space-y-1.5 bg-navy/50">
+                                <p><strong>Question to ask:</strong> Is a word, phrase, line, or pattern used again?</p>
+                                <p><strong>Clue to look for:</strong> A recurring word or phrase anywhere in the stanza/line.</p>
+                                <p class="text-gold"><em>Example:</em> "Run, run, run..."</p>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: Alliteration -->
+                        <div class="border border-gold/20 rounded-xl bg-navy-light/60 overflow-hidden">
+                            <button onclick="toggleAccordion('acc-all')" class="w-full p-3.5 text-left font-bold text-sm text-gold flex justify-between items-center bg-navy-light/90 hover:bg-navy-light transition">
+                                <span class="flex items-center gap-2"><i class="fa-solid fa-font"></i> Alliteration</span>
+                                <i id="acc-all-icon" class="fa-solid fa-chevron-down text-xs text-ivory/60"></i>
+                            </button>
+                            <div id="acc-all" class="hidden p-4 text-xs text-ivory/90 border-t border-gold/10 space-y-1.5 bg-navy/50">
+                                <p><strong>Question to ask:</strong> Do nearby words begin with the same consonant sound?</p>
+                                <p><strong>Clue to look for:</strong> Repeated initial consonant sounds.</p>
+                                <p class="text-gold"><em>Example:</em> Mia made many maps.</p>
+                            </div>
+                        </div>
+
+                        <!-- Row 4: Anaphora -->
+                        <div class="border border-gold/20 rounded-xl bg-navy-light/60 overflow-hidden">
+                            <button onclick="toggleAccordion('acc-ana')" class="w-full p-3.5 text-left font-bold text-sm text-gold flex justify-between items-center bg-navy-light/90 hover:bg-navy-light transition">
+                                <span class="flex items-center gap-2"><i class="fa-solid fa-[#]"></i> Anaphora</span>
+                                <i id="acc-ana-icon" class="fa-solid fa-chevron-down text-xs text-ivory/60"></i>
+                            </button>
+                            <div id="acc-ana" class="hidden p-4 text-xs text-ivory/90 border-t border-gold/10 space-y-1.5 bg-navy/50">
+                                <p><strong>Question to ask:</strong> Do successive clauses or lines begin with the same words?</p>
+                                <p><strong>Clue to look for:</strong> Repeated opening words or phrases.</p>
+                                <p class="text-gold"><em>Example:</em> "We will listen. We will learn."</p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Key Distinction Box -->
+                    <div class="p-3.5 bg-navy rounded-xl border border-gold/30 text-xs text-ivory/90 space-y-1">
+                        <span class="text-gold font-bold"><i class="fa-solid fa-scale-balanced mr-1"></i> Most Important Distinction:</span>
+                        <p>Repetition describes a broad pattern anywhere in a line. Anaphora is a <em>specific</em> pattern where repetition occurs specifically at the <strong>beginning</strong> of successive lines or clauses. When both apply, choose Anaphora if asked for the most specific device.</p>
+                    </div>
+
+                    <!-- Navigation Footer -->
+                    <div class="flex justify-between items-center pt-2">
+                        <button onclick="navigateTo(7)" class="text-xs text-ivory/70 hover:text-ivory px-3 py-2">
+                            <i class="fa-solid fa-arrow-left mr-1"></i> Back
+                        </button>
+                        <button onclick="navigateTo(9)" class="bg-gold hover:bg-gold-light text-navy font-bold text-xs px-6 py-2.5 rounded-lg transition flex items-center gap-2">
+                            <span>START 6-QUESTION CHALLENGE</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById(id + '-icon');
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.className = "fa-solid fa-chevron-up text-xs text-gold";
+            } else {
+                content.classList.add('hidden');
+                icon.className = "fa-solid fa-chevron-down text-xs text-ivory/60";
+            }
+        }
+
+        const challengeData = [
+            {
+                qNum: 1,
+                prompt: "“The gate swung wide; the children cried.” Which sound device is most clearly shown?",
+                choices: [
+                    { id: 'A', text: "Rhyme" },
+                    { id: 'B', text: "Repetition" },
+                    { id: 'C', text: "Alliteration" },
+                    { id: 'D', text: "Anaphora" }
+                ],
+                correct: 'A',
+                evidence: "wide / cried",
+                feedback: "Wide and cried share the same ending sound (/aid/).",
+                hint: "Compare the ending sounds of the two key words."
+            },
+            {
+                qNum: 2,
+                prompt: "“The echo called and called from the cave.” Which sound device is most clearly shown?",
+                choices: [
+                    { id: 'A', text: "Rhyme" },
+                    { id: 'B', text: "Repetition" },
+                    { id: 'C', text: "Alliteration" },
+                    { id: 'D', text: "Anaphora" }
+                ],
+                correct: 'B',
+                evidence: "called / called",
+                feedback: "The word 'called' is used again to emphasize the continuing echo.",
+                hint: "Find the word used more than once."
+            },
+            {
+                qNum: 3,
+                prompt: "“Dina draws delicate designs.” Which sound device is most clearly shown?",
+                choices: [
+                    { id: 'A', text: "Rhyme" },
+                    { id: 'B', text: "Repetition" },
+                    { id: 'C', text: "Alliteration" },
+                    { id: 'D', text: "Anaphora" }
+                ],
+                correct: 'C',
+                evidence: "Dina / draws / delicate / designs",
+                feedback: "These words repeat the initial /d/ sound.",
+                hint: "Listen to the initial consonant sound of nearby words."
+            },
+            {
+                qNum: 4,
+                prompt: "“We can ask. We can listen. We can decide.” Which is the most specific sound device?",
+                choices: [
+                    { id: 'A', text: "Rhyme" },
+                    { id: 'B', text: "Repetition only" },
+                    { id: 'C', text: "Alliteration" },
+                    { id: 'D', text: "Anaphora" }
+                ],
+                correct: 'D',
+                evidence: "We can",
+                feedback: "'We can' appears at the beginning of successive sentences. Anaphora is the specific form.",
+                hint: "Look at the first words of all three sentences."
+            },
+            {
+                qNum: 5,
+                prompt: "“The children wore a bright red coat and sailed away in a boat.” Which pair provides the rhyme clue?",
+                choices: [
+                    { id: 'A', text: "children / bright" },
+                    { id: 'B', text: "coat / boat" },
+                    { id: 'C', text: "red / sailed" },
+                    { id: 'D', text: "away / children" }
+                ],
+                correct: 'B',
+                evidence: "coat / boat",
+                feedback: "Coat and boat share the same ending sound (/oʊt/).",
+                hint: "Say each pair aloud and listen for matching ending sounds."
+            },
+            {
+                qNum: 6,
+                prompt: "“I waited and waited beside the gate.” Which device is most clearly shown?",
+                choices: [
+                    { id: 'A', text: "Rhyme" },
+                    { id: 'B', text: "Repetition" },
+                    { id: 'C', text: "Alliteration" },
+                    { id: 'D', text: "Anaphora" }
+                ],
+                correct: 'B',
+                evidence: "waited / waited",
+                feedback: "The word 'waited' is repeated to emphasize length or emotion of waiting.",
+                hint: "Look for a word that appears more than once."
+            }
+        ];
+
+        function renderScreen9(canvas) {
+            const idx = state.challenge.currentIndex;
+            const q = challengeData[idx];
+            const itemState = state.challenge.items[idx];
+
+            speakText(`Question ${idx + 1} of 6. ${q.prompt}`);
+
+            canvas.innerHTML = `
+                <div class="space-y-5">
+                    <!-- Top Challenge Header -->
+                    <div class="border-b border-gold/20 pb-3 flex justify-between items-center">
+                        <div>
+                            <span class="text-gold text-xs font-bold uppercase tracking-widest">Sound-Clue Match Challenge</span>
+                            <h2 class="text-xl font-bold text-ivory">Question ${idx + 1} of 6</h2>
+                        </div>
+                        <span class="text-xs text-gold font-semibold bg-navy-light px-3 py-1 rounded-full border border-gold/20">
+                            10 Points
+                        </span>
+                    </div>
+
+                    <!-- Item Prompt Box -->
+                    <div class="bg-navy p-4 rounded-xl border border-gold/30">
+                        <p class="text-base font-semibold text-ivory">${q.prompt}</p>
+                    </div>
+
+                    <!-- Hint Display Box -->
+                    <div id="ch-hint-box" class="hidden p-3 bg-amber-900/20 border border-amber-500/30 rounded-lg text-xs text-amber-200">
+                        <i class="fa-solid fa-lightbulb mr-1"></i> <strong>Hint:</strong> ${q.hint}
+                    </div>
+
+                    <!-- Choices Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        ${q.choices.map(c => `
+                            <button onclick="submitChallengeAnswer('${c.id}')"
+                                    ${itemState.completed ? 'disabled' : ''}
+                                    class="p-3.5 text-left bg-navy-light/90 hover:bg-navy-light border ${itemState.userChoice === c.id ? 'border-gold bg-navy-light' : 'border-gold/10'} rounded-xl text-xs font-medium transition flex items-center gap-3">
+                                <span class="w-6 h-6 rounded bg-navy flex items-center justify-center font-bold text-gold text-xs border border-gold/20">${c.id}</span>
+                                <span>${c.text}</span>
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    <!-- Feedback Box -->
+                    <div id="ch-feedback" class="${itemState.completed ? '' : 'hidden'} p-3.5 rounded-xl text-xs border"></div>
+
+                    <!-- Challenge Pagination & Controls -->
+                    <div class="flex justify-between items-center pt-2">
+                        <button onclick="if(state.challenge.currentIndex > 0){ state.challenge.currentIndex--; renderScreen(); } else { navigateTo(8); }" class="text-xs text-ivory/70 hover:text-ivory px-3 py-2">
+                            <i class="fa-solid fa-arrow-left mr-1"></i> ${idx === 0 ? 'To Board' : 'Previous Question'}
+                        </button>
+                        
+                        <button id="ch-next-btn" onclick="nextChallengeQuestion()"
+                                class="${itemState.completed ? '' : 'opacity-50 pointer-events-none'} bg-gold hover:bg-gold-light text-navy font-bold text-xs px-6 py-2.5 rounded-lg transition flex items-center gap-2">
+                            <span>${idx === 5 ? 'TO FINAL POEM CASE' : 'NEXT QUESTION'}</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            if (itemState.completed) {
+                renderChallengeFeedbackUI(itemState.userChoice === q.correct, itemState.userChoice);
+            }
+        }
+
+        function submitChallengeAnswer(choice) {
+            const idx = state.challenge.currentIndex;
+            const q = challengeData[idx];
+            const itemState = state.challenge.items[idx];
+
+            if (itemState.completed) return;
+
+            itemState.attempt++;
+            itemState.userChoice = choice;
+
+            const isCorrect = (choice === q.correct);
+
+            if (isCorrect) {
+                itemState.completed = true;
+                const points = (itemState.attempt === 1) ? 10 : 5;
+                itemState.scoreEarned = points;
+                updateScore(points, itemState.attempt === 1);
+                speakText("Correct! " + q.feedback);
+                renderChallengeFeedbackUI(true, choice);
+            } else {
+                if (itemState.attempt === 1) {
+                    document.getElementById('ch-hint-box').classList.remove('hidden');
+                    speakText("Not quite. " + q.hint);
+                    renderChallengeFeedbackUI(false, choice, true);
+                } else {
+                    itemState.completed = true;
+                    itemState.scoreEarned = 0;
+                    speakText("Incorrect. " + q.feedback);
+                    renderChallengeFeedbackUI(false, choice, false);
+                }
+            }
+        }
+
+        function renderChallengeFeedbackUI(isCorrect, choice, canRetry = false) {
+            const idx = state.challenge.currentIndex;
+            const q = challengeData[idx];
+            const feedbackBox = document.getElementById('ch-feedback');
+            const nextBtn = document.getElementById('ch-next-btn');
+
+            feedbackBox.classList.remove('hidden');
+
+            if (isCorrect) {
+                feedbackBox.className = "p-3.5 rounded-xl text-xs border border-green-500/40 bg-green-900/20 text-green-200 space-y-1";
+                feedbackBox.innerHTML = `
+                    <div class="font-bold flex items-center gap-1.5 text-green-400">
+                        <i class="fa-solid fa-circle-check"></i> Correct! Evidence: ${q.evidence} (+${state.challenge.items[idx].scoreEarned} pts)
+                    </div>
+                    <p>${q.feedback}</p>
+                `;
+                if (nextBtn) nextBtn.classList.remove('opacity-50', 'pointer-events-none');
+            } else if (canRetry) {
+                feedbackBox.className = "p-3.5 rounded-xl text-xs border border-amber-500/40 bg-amber-900/20 text-amber-200 space-y-1";
+                feedbackBox.innerHTML = `
+                    <div class="font-bold flex items-center gap-1.5 text-amber-400">
+                        <i class="fa-solid fa-circle-exclamation"></i> Try Again (1 Retry Remaining)
+                    </div>
+                    <p>Re-read the line carefully and consider the hint above.</p>
+                `;
+            } else {
+                feedbackBox.className = "p-3.5 rounded-xl text-xs border border-red-500/40 bg-red-900/20 text-red-200 space-y-1";
+                feedbackBox.innerHTML = `
+                    <div class="font-bold flex items-center gap-1.5 text-red-400">
+                        <i class="fa-solid fa-circle-xmark"></i> Correct Answer: ${q.correct} (${q.choices.find(c=>c.id===q.correct).text})
+                    </div>
+                    <p>Evidence: <strong>${q.evidence}</strong>. ${q.feedback}</p>
+                `;
+                if (nextBtn) nextBtn.classList.remove('opacity-50', 'pointer-events-none');
+            }
+        }
+
+        function nextChallengeQuestion() {
+            if (state.challenge.currentIndex < 5) {
+                state.challenge.currentIndex++;
+                renderScreen();
+            } else {
+                navigateTo(10);
+            }
+        }
+
+        function renderScreen10(canvas) {
+            speakText("Screen 10. The Poem With Four Clues. A Journey of Courage. Read the poem carefully. Four sound-device clues are hidden in its lines.");
+
+            canvas.innerHTML = `
+                <div class="space-y-6">
+                    <div class="border-b border-gold/20 pb-3">
+                        <span class="text-gold text-xs font-bold uppercase tracking-widest">Screen 10 • Case Poem</span>
+                        <h2 class="text-xl font-bold text-ivory">The Poem With Four Clues</h2>
+                        <p class="text-xs text-ivory/80 mt-0.5">Read the poem carefully. Four sound-device clues are hidden in its lines. You will annotate and analyze them next.</p>
+                    </div>
+
+                    <!-- Unannotated Original Poem Card -->
+                    <div class="bg-navy p-6 md:p-8 rounded-2xl border border-gold/30 shadow-inner text-center space-y-4">
+                        <h3 class="text-lg font-extrabold text-gold tracking-widest uppercase border-b border-gold/20 pb-2 inline-block">
+                            A JOURNEY OF COURAGE
+                        </h3>
+                        <div class="space-y-2 text-sm md:text-base text-ivory/90 leading-relaxed font-serif italic">
+                            <p>Soft rain swept the silent street,</p>
+                            <p>Lanterns shimmered by my feet.</p>
+                            <p>“Come along, come along,” I called,</p>
+                            <p>While gray clouds gathered over the field.</p>
+                            <p>When the bell rang, doors opened slowly.</p>
+                            <p>When the bell rang, friends came closer.</p>
+                        </div>
+                    </div>
+
+                    <!-- Information Box -->
+                    <div class="p-3.5 bg-navy-light/60 rounded-xl border border-gold/20 text-xs text-ivory/80 flex items-center gap-3">
+                        <i class="fa-solid fa-circle-info text-gold text-base flex-shrink-0"></i>
+                        <span>On the next screen, you will complete 5 interactive tasks to identify evidence for Rhyme, Repetition, Alliteration, Anaphora, and their Effect.</span>
+                    </div>
+
+                    <!-- Footer Controls -->
+                    <div class="flex justify-between items-center pt-2">
+                        <button onclick="navigateTo(9)" class="text-xs text-ivory/70 hover:text-ivory px-3 py-2">
+                            <i class="fa-solid fa-arrow-left mr-1"></i> Back
+                        </button>
+                        <button onclick="navigateTo(11)" class="bg-gold hover:bg-gold-light text-navy font-bold text-sm px-6 py-2.5 rounded-lg transition flex items-center gap-2">
+                            <span>ANNOTATE THE POEM</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        const finalCaseTasksData = [
+            {
+                taskNum: 1,
+                title: "Task 1: Rhyme Evidence",
+                instruction: "Highlight the pair of words with matching ending sounds.",
+                type: "highlight_pair",
+                correctPair: ["street", "feet"],
+                hint: "Look at the end of the first two lines: street and feet.",
+                explanation: "'street' and 'feet' share the matching ending sound (/it/)."
+            },
+            {
+                taskNum: 2,
+                title: "Task 2: Repetition Evidence",
+                instruction: "Drag or tap the repeated phrase into the evidence marker box.",
+                type: "drag_tap",
+                correctPhrase: "Come along, come along",
+                options: ["Come along, come along", "When the bell rang", "silent street"],
+                hint: "Look for a phrase repeated right next to itself in line 3.",
+                explanation: "'Come along, come along' is repeated directly to emphasize the call."
+            },
+            {
+                taskNum: 3,
+                title: "Task 3: Alliteration Evidence",
+                instruction: "Highlight the line that contains repeated initial consonant sounds.",
+                type: "highlight_line",
+                correctLineIndex: 0, // "Soft rain swept the silent street"
+                lines: [
+                    "Soft rain swept the silent street,",
+                    "Lanterns shimmered by my feet.",
+                    "“Come along, come along,” I called,",
+                    "While gray clouds gathered over the field."
+                ],
+                hint: "Listen for the repeated initial /s/ sound in line 1.",
+                explanation: "'Soft rain swept the silent street' repeats the initial /s/ consonant sound."
+            },
+            {
+                taskNum: 4,
+                title: "Task 4: Anaphora Evidence",
+                instruction: "Highlight the phrase repeated at the beginning of successive clauses.",
+                type: "highlight_phrase",
+                correctPhrase: "When the bell rang",
+                options: ["When the bell rang", "doors opened slowly", "friends came closer"],
+                hint: "Look at how the last two lines begin.",
+                explanation: "'When the bell rang' opens both successive lines, creating anaphora."
+            },
+            {
+                taskNum: 5,
+                title: "Task 5: Sound Pattern Effect",
+                instruction: "Choose the most likely effect of repeating 'When the bell rang'.",
+                type: "select_effect",
+                choices: [
+                    { id: 'A', text: "It simply fills space in the poem." },
+                    { id: 'B', text: "It emphasizes the bell as a signal for events and shows how the sound brings people together." },
+                    { id: 'C', text: "It makes the reader forget what happened earlier in the street." }
+                ],
+                correct: 'B',
+                hint: "Think about how the repeated opening connects the bell to the actions that follow.",
+                explanation: "The opening repetition highlights the bell's signal and links it to the opening doors and approaching friends."
+            }
+        ];
+
+        function renderScreen11(canvas) {
+            const idx = state.finalCase.currentIndex;
+            const task = finalCaseTasksData[idx];
+            const taskState = state.finalCase.tasks[idx];
+
+            speakText(`${task.title}. ${task.instruction}`);
+
+            canvas.innerHTML = `
+                <div class="space-y-5">
+                    <div class="border-b border-gold/20 pb-2 flex justify-between items-center">
+                        <div>
+                            <span class="text-gold text-xs font-bold uppercase tracking-widest">Final Case Evidence Task ${idx + 1} of 5</span>
+                            <h2 class="text-lg font-bold text-ivory">${task.title}</h2>
+                        </div>
+                        <span class="text-xs text-gold font-semibold bg-navy-light px-3 py-1 rounded-full border border-gold/20">10 Points</span>
+                    </div>
+
+                    <!-- Poem Canvas Reference Display -->
+                    <div class="bg-navy p-4 rounded-xl border border-gold/20 text-xs font-serif italic text-ivory/80 space-y-1">
+                        <p id="poem-line-0">Soft rain swept the silent street,</p>
+                        <p id="poem-line-1">Lanterns shimmered by my feet.</p>
+                        <p id="poem-line-2">“Come along, come along,” I called,</p>
+                        <p id="poem-line-3">While gray clouds gathered over the field.</p>
+                        <p id="poem-line-4">When the bell rang, doors opened slowly.</p>
+                        <p id="poem-line-5">When the bell rang, friends came closer.</p>
+                    </div>
+
+                    <!-- Instruction & Action Area -->
+                    <div class="bg-navy-light/80 p-4 rounded-xl border border-gold/30 space-y-3">
+                        <p class="text-xs font-bold text-gold uppercase tracking-wide"><i class="fa-solid fa-hand-pointer mr-1"></i> ${task.instruction}</p>
+
+                        <!-- Task Dynamic Control Canvas -->
+                        <div id="task-interaction-canvas">
+                            ${renderTaskInteractionUI(task, taskState)}
+                        </div>
+                    </div>
+
+                    <!-- Task Hint Box -->
+                    <div id="fc-hint-box" class="hidden p-3 bg-amber-900/20 border border-amber-500/30 rounded-lg text-xs text-amber-200">
+                        <i class="fa-solid fa-lightbulb mr-1"></i> <strong>Hint:</strong> ${task.hint}
+                    </div>
+
+                    <!-- Task Feedback Box -->
+                    <div id="fc-feedback" class="${taskState.completed ? '' : 'hidden'} p-3.5 rounded-xl text-xs border"></div>
+
+                    <!-- Pagination Navigation Controls -->
+                    <div class="flex justify-between items-center pt-2">
+                        <button onclick="if(state.finalCase.currentIndex > 0){ state.finalCase.currentIndex--; renderScreen(); } else { navigateTo(10); }" class="text-xs text-ivory/70 hover:text-ivory px-3 py-2">
+                            <i class="fa-solid fa-arrow-left mr-1"></i> ${idx === 0 ? 'To Poem' : 'Previous Task'}
+                        </button>
+                        
+                        <button id="fc-next-btn" onclick="nextFinalCaseTask()"
+                                class="${taskState.completed ? '' : 'opacity-50 pointer-events-none'} bg-gold hover:bg-gold-light text-navy font-bold text-xs px-6 py-2.5 rounded-lg transition flex items-center gap-2">
+                            <span>${idx === 4 ? 'COMPLETE INVESTIGATION' : 'NEXT TASK'}</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            if (taskState.completed) {
+                renderTaskFeedbackUI(taskState.scoreEarned > 0);
+            }
+        }
+
+        function renderTaskInteractionUI(task, taskState) {
+            if (task.type === 'highlight_pair') {
+                return `
+                    <div class="space-y-2">
+                        <p class="text-xs text-ivory/70">Select the two rhyming words from the choices below:</p>
+                        <div class="flex flex-wrap gap-2">
+                            ${['street', 'feet', 'rain', 'silent', 'clouds', 'bell'].map(w => `
+                                <button onclick="toggleWordSelection('${w}')" id="word-btn-${w}" class="px-3 py-1.5 rounded-lg text-xs border border-gold/30 bg-navy hover:bg-navy-light ${taskState.selected.includes(w) ? 'highlight-selected' : ''}">
+                                    ${w}
+                                </button>
+                            `).join('')}
+                        </div>
+                        <button onclick="submitTask1()" ${taskState.completed ? 'disabled' : ''} class="mt-2 bg-gold text-navy text-xs font-bold px-4 py-2 rounded-lg hover:bg-gold-light transition">
+                            Submit Evidence Pair
+                        </button>
+                    </div>
+                `;
+            } else if (task.type === 'drag_tap') {
+                return `
+                    <div class="space-y-3">
+                        <div id="drop-target" class="p-3 border-2 border-dashed border-gold/40 rounded-xl bg-navy/60 text-center text-xs text-gold font-semibold">
+                            ${taskState.value ? `Selected: "${taskState.value}"` : 'Tap a phrase below to place in evidence marker'}
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            ${task.options.map(opt => `
+                                <button onclick="selectTask2Option('${opt}')" class="p-2.5 bg-navy border border-gold/20 hover:border-gold rounded-lg text-xs text-left transition">
+                                    <i class="fa-solid fa-quote-left text-gold mr-1"></i> "${opt}"
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (task.type === 'highlight_line') {
+                return `
+                    <div class="space-y-2">
+                        ${task.lines.map((l, i) => `
+                            <button onclick="submitTask3Line(${i})" class="w-full text-left p-2.5 bg-navy border ${taskState.selectedIndex === i ? 'border-gold bg-navy-light' : 'border-gold/20'} hover:border-gold/50 rounded-lg text-xs transition">
+                                ${l}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (task.type === 'highlight_phrase') {
+                return `
+                    <div class="space-y-2">
+                        ${task.options.map((opt, i) => `
+                            <button onclick="submitTask4Phrase('${opt}', ${i})" class="w-full text-left p-2.5 bg-navy border ${taskState.selectedIndex === i ? 'border-gold bg-navy-light' : 'border-gold/20'} hover:border-gold rounded-lg text-xs transition">
+                                "${opt}"
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (task.type === 'select_effect') {
+                return `
+                    <div class="space-y-2">
+                        ${task.choices.map(c => `
+                            <button onclick="submitTask5Effect('${c.id}')" class="w-full text-left p-3 bg-navy border ${taskState.choice === c.id ? 'border-gold bg-navy-light' : 'border-gold/20'} hover:border-gold rounded-lg text-xs transition">
+                                <span class="font-bold text-gold mr-1">${c.id}.</span> ${c.text}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        }
+
+        // Task 1 Logic
+        function toggleWordSelection(word) {
+            const taskState = state.finalCase.tasks[0];
+            if (taskState.completed) return;
+
+            const idx = taskState.selected.indexOf(word);
+            if (idx > -1) {
+                taskState.selected.splice(idx, 1);
+            } else {
+                if (taskState.selected.length < 2) taskState.selected.push(word);
+            }
+            renderScreen();
+        }
+
+        function submitTask1() {
+            const taskState = state.finalCase.tasks[0];
+            if (taskState.completed || taskState.selected.length < 2) return;
+
+            taskState.attempt++;
+            const correctPair = finalCaseTasksData[0].correctPair;
+            const isCorrect = correctPair.every(w => taskState.selected.includes(w));
+
+            processTaskResult(0, isCorrect);
+        }
+
+        // Task 2 Logic
+        function selectTask2Option(opt) {
+            const taskState = state.finalCase.tasks[1];
+            if (taskState.completed) return;
+
+            taskState.value = opt;
+            taskState.attempt++;
+            const isCorrect = (opt === finalCaseTasksData[1].correctPhrase);
+
+            processTaskResult(1, isCorrect);
+        }
+
+        // Task 3 Logic
+        function submitTask3Line(lineIdx) {
+            const taskState = state.finalCase.tasks[2];
+            if (taskState.completed) return;
+
+            taskState.selectedIndex = lineIdx;
+            taskState.attempt++;
+            const isCorrect = (lineIdx === finalCaseTasksData[2].correctLineIndex);
+
+            processTaskResult(2, isCorrect);
+        }
+
+        // Task 4 Logic
+        function submitTask4Phrase(phrase, optIdx) {
+            const taskState = state.finalCase.tasks[3];
+            if (taskState.completed) return;
+
+            taskState.selectedIndex = optIdx;
+            taskState.attempt++;
+            const isCorrect = (phrase === finalCaseTasksData[3].correctPhrase);
+
+            processTaskResult(3, isCorrect);
+        }
+
+        // Task 5 Logic
+        function submitTask5Effect(choiceId) {
+            const taskState = state.finalCase.tasks[4];
+            if (taskState.completed) return;
+
+            taskState.choice = choiceId;
+            taskState.attempt++;
+            const isCorrect = (choiceId === finalCaseTasksData[4].correct);
+
+            processTaskResult(4, isCorrect);
+        }
+
+        function processTaskResult(taskIdx, isCorrect) {
+            const taskState = state.finalCase.tasks[taskIdx];
+            const taskData = finalCaseTasksData[taskIdx];
+
+            if (isCorrect) {
+                taskState.completed = true;
+                const points = (taskState.attempt === 1) ? 10 : 5;
+                taskState.scoreEarned = points;
+                updateScore(points, taskState.attempt === 1);
+                speakText("Correct evidence! " + taskData.explanation);
+                renderScreen();
+            } else {
+                if (taskState.attempt === 1) {
+                    document.getElementById('fc-hint-box').classList.remove('hidden');
+                    speakText("Not quite. " + taskData.hint);
+                    renderTaskFeedbackUI(false, true);
+                } else {
+                    taskState.completed = true;
+                    taskState.scoreEarned = 0;
+                    speakText("Incorrect. " + taskData.explanation);
+                    renderScreen();
+                }
+            }
+        }
+
+        function renderTaskFeedbackUI(isCorrect, canRetry = false) {
+            const idx = state.finalCase.currentIndex;
+            const taskData = finalCaseTasksData[idx];
+            const feedbackBox = document.getElementById('fc-feedback');
+            const nextBtn = document.getElementById('fc-next-btn');
+
+            if (!feedbackBox) return;
+            feedbackBox.classList.remove('hidden');
+
+            if (isCorrect) {
+                feedbackBox.className = "p-3.5 rounded-xl text-xs border border-green-500/40 bg-green-900/20 text-green-200 space-y-1";
+                feedbackBox.innerHTML = `
+                    <div class="font-bold flex items-center gap-1.5 text-green-400">
+                        <i class="fa-solid fa-circle-check"></i> Evidence Confirmed! (+${state.finalCase.tasks[idx].scoreEarned} pts)
+                    </div>
+                    <p>${taskData.explanation}</p>
+                `;
+                if (nextBtn) nextBtn.classList.remove('opacity-50', 'pointer-events-none');
+            } else if (canRetry) {
+                feedbackBox.className = "p-3.5 rounded-xl text-xs border border-amber-500/40 bg-amber-900/20 text-amber-200 space-y-1";
+                feedbackBox.innerHTML = `
+                    <div class="font-bold flex items-center gap-1.5 text-amber-400">
+                        <i class="fa-solid fa-circle-exclamation"></i> Try Again (1 Retry Remaining)
+                    </div>
+                    <p>Check the hint above and select your evidence carefully.</p>
+                `;
+            } else {
+                feedbackBox.className = "p-3.5 rounded-xl text-xs border border-red-500/40 bg-red-900/20 text-red-200 space-y-1";
+                feedbackBox.innerHTML = `
+                    <div class="font-bold flex items-center gap-1.5 text-red-400">
+                        <i class="fa-solid fa-circle-xmark"></i> Evidence Unmatched
+                    </div>
+                    <p>${taskData.explanation}</p>
+                `;
+                if (nextBtn) nextBtn.classList.remove('opacity-50', 'pointer-events-none');
+            }
+        }
+
+        function nextFinalCaseTask() {
+            if (state.finalCase.currentIndex < 4) {
+                state.finalCase.currentIndex++;
+                renderScreen();
+            } else {
+                // Award Completion Badges
+                state.badges.sleuth = true;
+                if (state.score >= 120) {
+                    state.badges.master = true;
+                }
+                navigateTo(12);
+            }
+        }
+
+        function renderScreen12(canvas) {
+            speakText("Case Debrief. What did the clues reveal? Review how sound patterns create rhythm and meaning in the poem.");
+
+            canvas.innerHTML = `
+                <div class="space-y-5">
+                    <div class="border-b border-gold/20 pb-3 flex justify-between items-center">
+                        <div>
+                            <span class="text-gold text-xs font-bold uppercase tracking-widest">Screen 12 • Case Debrief</span>
+                            <h2 class="text-xl font-bold text-ivory">What Did the Clues Reveal?</h2>
+                        </div>
+                        <span class="bg-slate/40 text-xs px-2.5 py-1 rounded-full text-ivory/70 border border-slate/30">Case Summary</span>
+                    </div>
+
+                    <!-- Highlighted Annotated Poem Display -->
+                    <div class="bg-navy p-5 rounded-2xl border border-gold/30 text-xs md:text-sm font-serif italic text-ivory/90 space-y-2">
+                        <p><span class="highlight-selected px-1.5 py-0.5 rounded text-navy font-sans font-bold not-italic text-xs mr-2">Alliteration</span> <span class="border-b-2 border-gold">Soft rain swept the silent street,</span></p>
+                        <p><span class="highlight-selected px-1.5 py-0.5 rounded text-navy font-sans font-bold not-italic text-xs mr-2">Rhyme</span> Lanterns shimmered by my <strong class="text-gold underline">feet</strong> (rhymes with <strong class="text-gold underline">street</strong>).</p>
+                        <p><span class="highlight-selected px-1.5 py-0.5 rounded text-navy font-sans font-bold not-italic text-xs mr-2">Repetition</span> “<strong class="text-gold">Come along, come along</strong>,” I called,</p>
+                        <p>While gray clouds gathered over the field.</p>
+                        <p><span class="highlight-selected px-1.5 py-0.5 rounded text-navy font-sans font-bold not-italic text-xs mr-2">Anaphora</span> <strong class="text-gold">When the bell rang</strong>, doors opened slowly.</p>
+                        <p><span class="highlight-selected px-1.5 py-0.5 rounded text-navy font-sans font-bold not-italic text-xs mr-2">Anaphora</span> <strong class="text-gold">When the bell rang</strong>, friends came closer.</p>
+                    </div>
+
+                    <!-- Reflection Question Box -->
+                    <div class="bg-navy-light/80 p-4 rounded-xl border border-gold/20 space-y-2">
+                        <p class="text-xs font-bold text-gold uppercase tracking-wide"><i class="fa-solid fa-comments mr-1"></i> Reflection Question:</p>
+                        <p class="text-xs text-ivory/90 font-medium">Why should readers examine sound patterns instead of merely naming them?</p>
+                        <p class="text-xs text-ivory/70 bg-navy p-2.5 rounded-lg border border-gold/10">
+                            <strong>Suggested Response:</strong> Sound patterns help readers notice emphasis, rhythm, and how a writer communicates deeper feeling. Their true value is in how they affect meaning, not just their labels.
+                        </p>
+                    </div>
+
+                    <!-- Controls -->
+                    <div class="flex justify-between items-center pt-2">
+                        <button onclick="navigateTo(8)" class="bg-navy-light hover:bg-slate border border-gold/30 text-gold text-xs font-bold px-4 py-2.5 rounded-lg transition flex items-center gap-2">
+                            <i class="fa-solid fa-book-open"></i>
+                            <span>REVIEW COMPARISON BOARD</span>
+                        </button>
+                        <button onclick="navigateTo(13)" class="bg-gold hover:bg-gold-light text-navy font-bold text-xs px-6 py-2.5 rounded-lg transition flex items-center gap-2">
+                            <span>SEE RESULTS & BADGES</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderScreen13(canvas) {
+            speakText(`Mission Complete! Case Closed! You scored ${state.score} out of 150 points.`);
+
+            const firstAttemptCount = getFirstAttemptCorrectCount();
+
+            canvas.innerHTML = `
+                <div class="space-y-6 my-auto py-2">
+                    <!-- Title Header -->
+                    <div class="text-center space-y-2">
+                        <span class="inline-block bg-gold/20 text-gold font-bold text-xs uppercase tracking-widest px-3 py-1 rounded-full border border-gold/30">
+                            MISSION 1 ACCOMPLISHED
+                        </span>
+                        <h2 class="text-3xl font-extrabold text-ivory tracking-tight">CASE CLOSED!</h2>
+                        <p class="text-xs md:text-sm text-ivory/80 max-w-lg mx-auto">
+                            You have investigated four sound devices, collected evidence from literary lines, and earned rewards for your detective work.
+                        </p>
+                    </div>
+
+                    <!-- Score Overview Card Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-navy p-4 rounded-xl border border-gold/30 text-center space-y-1">
+                            <span class="text-xs text-ivory/70 font-semibold uppercase">Total Investigation Score</span>
+                            <p class="text-3xl font-extrabold text-gold">${state.score} <span class="text-base text-ivory/60 font-normal">/ 150</span></p>
+                        </div>
+                        <div class="bg-navy p-4 rounded-xl border border-gold/30 text-center space-y-1">
+                            <span class="text-xs text-ivory/70 font-semibold uppercase">First-Attempt Correct</span>
+                            <p class="text-3xl font-extrabold text-ivory">${firstAttemptCount} <span class="text-base text-ivory/60 font-normal">/ 15 items</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Badge Cabinet -->
+                    <div class="bg-navy-light/60 p-5 rounded-2xl border border-gold/20 space-y-3">
+                        <h3 class="text-xs font-bold text-gold uppercase tracking-wider text-center">Detective Badge Cabinet</h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            ${renderBadgeCard('Rhyme Ranger', state.badges.rhyme, 'fa-music', 'Checkpoint 1')}
+                            ${renderBadgeCard('Repetition Tracker', state.badges.repetition, 'fa-rotate-right', 'Checkpoint 2')}
+                            ${renderBadgeCard('Alliteration Alert', state.badges.alliteration, 'fa-font', 'Checkpoint 3')}
+                            ${renderBadgeCard('Anaphora Analyst', state.badges.anaphora, 'fa-[#]', 'Checkpoint 4')}
+                            ${renderBadgeCard('Sound Sleuth', state.badges.sleuth, 'fa-user-ninja', 'Complete Mission')}
+                            ${renderBadgeCard('Sound Pattern Master', state.badges.master, 'fa-crown', '120+ Points')}
+                        </div>
+                    </div>
+
+                    <!-- Final Control Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                        <button onclick="reviewMissedQuestions()" class="bg-navy-light hover:bg-slate border border-gold/30 text-gold text-xs font-bold px-5 py-3 rounded-xl transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            <span>REVIEW MISSED QUESTIONS</span>
+                        </button>
+
+                        <button onclick="replayMission()" class="bg-navy-light hover:bg-slate border border-gold/30 text-ivory text-xs font-bold px-5 py-3 rounded-xl transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-redo"></i>
+                            <span>REPLAY MISSION</span>
+                        </button>
+
+                        <button onclick="alert('Mission 2: Meaning Quest unlocked in full curriculum suite!')" class="bg-gold hover:bg-gold-light text-navy font-extrabold text-xs px-6 py-3 rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
+                            <span>CONTINUE TO MISSION 2</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderBadgeCard(name, earned, iconClass, condition) {
+            return `
+                <div class="${earned ? 'bg-navy border-gold/50 text-ivory' : 'bg-navy/40 border-slate/20 text-ivory/40 badge-locked'} p-3 rounded-xl border flex flex-col items-center text-center space-y-1 transition">
+                    <div class="${earned ? 'bg-gold text-navy' : 'bg-slate/30 text-ivory/30'} w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid ${iconClass}"></i>
+                    </div>
+                    <span class="text-xs font-bold leading-tight">${name}</span>
+                    <span class="text-[10px] ${earned ? 'text-gold' : 'text-ivory/40'}">${earned ? 'Earned' : condition}</span>
+                </div>
+            `;
+        }
+
+        function getFirstAttemptCorrectCount() {
+            let count = 0;
+            // Checkpoints
+            [4, 5, 6, 7].forEach(s => {
+                if (state.checkpoints[s].scoreEarned === 10) count++;
+            });
+            // Challenge
+            state.challenge.items.forEach(i => {
+                if (i.scoreEarned === 10) count++;
+            });
+            // Final Case
+            state.finalCase.tasks.forEach(t => {
+                if (t.scoreEarned === 10) count++;
+            });
+            return count;
+        }
+
+        function reviewMissedQuestions() {
+            // Reopen mixed challenge for review
+            state.challenge.currentIndex = 0;
+            navigateTo(9);
+        }
+
+        function replayMission() {
+            // Reset state
+            state.score = 0;
+            state.firstAttemptScore = 0;
+            state.conceptRevealStage = { 4: 1, 5: 1, 6: 1, 7: 1 };
+            state.checkpoints = {
+                4: { completed: false, attempt: 0, scoreEarned: 0, choice: null },
+                5: { completed: false, attempt: 0, scoreEarned: 0, choice: null },
+                6: { completed: false, attempt: 0, scoreEarned: 0, choice: null },
+                7: { completed: false, attempt: 0, scoreEarned: 0, choice: null }
+            };
+            state.challenge = {
+                currentIndex: 0,
+                items: Array.from({length: 6}, (_, i) => ({ id: i + 1, completed: false, attempt: 0, scoreEarned: 0, userChoice: null }))
+            };
+            state.finalCase = {
+                currentIndex: 0,
+                tasks: [
+                    { id: 1, type: 'highlight_pair', completed: false, attempt: 0, scoreEarned: 0, selected: [] },
+                    { id: 2, type: 'drag_tap', completed: false, attempt: 0, scoreEarned: 0, value: null },
+                    { id: 3, type: 'highlight_line', completed: false, attempt: 0, scoreEarned: 0, selectedIndex: null },
+                    { id: 4, type: 'highlight_phrase', completed: false, attempt: 0, scoreEarned: 0, selectedIndex: null },
+                    { id: 5, type: 'select_effect', completed: false, attempt: 0, scoreEarned: 0, choice: null }
+                ]
+            };
+            state.badges = { rhyme: false, repetition: false, alliteration: false, anaphora: false, sleuth: false, master: false };
+            
+            document.getElementById('current-score').innerText = '0';
+            navigateTo(1);
+        }
+
+        window.onload = function() {
+            renderScreen();
+        };
+    </script>
+</body>
+</html>
